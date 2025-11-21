@@ -1,0 +1,830 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "bookend-main",
+    "title": "Bookend Recommendation System - Main Dashboard",
+    "tags": ["bookend", "recommendations", "api"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h"],
+      "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
+    },
+    "annotations": {
+      "list": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "enable": true,
+          "expr": "changes(bookend_app_info[5m]) > 0",
+          "iconColor": "rgba(255, 96, 96, 1)",
+          "name": "Deployments",
+          "tagKeys": "version"
+        }
+      ]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "type": "row",
+        "title": "Overview - System Health",
+        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0},
+        "collapsed": false
+      },
+      {
+        "id": 2,
+        "type": "stat",
+        "title": "Total Requests (5m rate)",
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 1},
+        "targets": [
+          {
+            "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+            "expr": "sum(rate(bookend_http_requests_total[5m])) * 60",
+            "legendFormat": "req/min",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value",
+          "orientation": "auto",
+          "textMode": "auto",
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"]
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqpm",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": null, "color": "green"},
+                {"value": 100, "color": "yellow"},
+                {"value": 500, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "type": "stat",
+        "title": "Success Rate",
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 1},
+        "targets": [
+          {
+            "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+            "expr": "sum(rate(bookend_http_requests_total{status_code=~\"2..\"}[5m])) / sum(rate(bookend_http_requests_total[5m])) * 100",
+            "legendFormat": "Success %",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value",
+          "orientation": "auto",
+          "textMode": "value_and_name"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "decimals": 2,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": null, "color": "red"},
+                {"value": 95, "color": "yellow"},
+                {"value": 99, "color": "green"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "type": "stat",
+        "title": "Active Users (5m)",
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 1},
+        "targets": [
+          {
+            "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+            "expr": "bookend_active_users_total{time_window=\"5m\"}",
+            "legendFormat": "Users",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": null, "color": "blue"},
+                {"value": 100, "color": "green"},
+                {"value": 1000, "color": "yellow"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "type": "stat",
+        "title": "P95 Latency",
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 1},
+        "targets": [
+          {
+            "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+            "expr": "histogram_quantile(0.95, sum(rate(bookend_http_request_duration_seconds_bucket[5m])) by (le)) * 1000",
+            "legendFormat": "p95",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "decimals": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": null, "color": "green"},
+                {"value": 500, "color": "yellow"},
+                {"value": 1000, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 6,
+        "type": "row",
+        "title": "HTTP Traffic & Performance",
+        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 5},
+        "collapsed": false
+      },
+      {
+        "id": 7,
+        "type": "timeseries",
+        "title": "Request Rate by Endpoint",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+        "targets": [
+          {
+            "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+            "expr": "sum(rate(bookend_http_requests_total[5m])) by (endpoint, method)",
+            "legendFormat": "{{method}} {{endpoint}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 10,
+              "showPoints": "never",
+              "spanNulls": true
+            },
+            "unit": "reqps"
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "table",
+            "placement": "right",
+            "calcs": ["mean", "lastNotNull", "max"]
+          }
+        }
+      },
+      {
+        "id": 8,
+        "type": "timeseries",
+        "title": "Request Latency (p50, p95, p99)",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+        "targets": [
+          {
+            "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+            "expr": "histogram_quantile(0.50, sum(rate(bookend_http_request_duration_seconds_bucket[5m])) by (le, endpoint)) * 1000",
+            "legendFormat": "p50 - {{endpoint}}",
+            "refId": "A"
+          },
+          {
+            "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+            "expr": "histogram_quantile(0.95, sum(rate(bookend_http_request_duration_seconds_bucket[5m])) by (le, endpoint)) * 1000",
+            "legendFormat": "p95 - {{endpoint}}",
+            "refId": "B"
+          },
+          {
+            "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+            "expr": "histogram_quantile(0.99, sum(rate(bookend_http_request_duration_seconds_bucket[5m])) by (le, endpoint)) * 1000",
+            "legendFormat": "p99 - {{endpoint}}",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 0
+            },
+            "unit": "ms"
+          }
+        }
+      },
+      {
+        "id": 9,
+        "type": "timeseries",
+        "title": "HTTP Status Codes",
+        "gridPos": {"h": 6, "w": 8, "x": 0, "y": 14},
+        "targets": [
+          {
+            "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+            "expr": "sum(rate(bookend_http_requests_total[5m])) by (status_code)",
+            "legendFormat": "{{status_code}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "drawStyle": "bars",
+              "fillOpacity": 80,
+              "stacking": {"mode": "normal"}
+            },
+            "unit": "reqps"
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byRegexp", "options": "2.."},
+              "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "green"}}]
+            },
+            {
+              "matcher": {"id": "byRegexp", "options": "4.."},
+              "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "yellow"}}]
+            },
+            {
+              "matcher": {"id": "byRegexp", "options": "5.."},
+              "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}]
+            }
+          ]
+        }
+      },
+      {
+        "id": 10,
+        "type": "bargauge",
+        "title": "Request Size Distribution",
+        "gridPos": {"h": 6, "w": 8, "x": 8, "y": 14},
+        "targets": [
+          {
+            "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+            "expr": "sum(rate(bookend_http_request_size_bytes_sum[5m])) by (endpoint) / sum(rate(bookend_http_request_size_bytes_count[5m])) by (endpoint)",
+            "legendFormat": "{{endpoint}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "orientation": "horizontal",
+          "displayMode": "gradient"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "bytes"
+          }
+        }
+      },
+      {
+        "id": 11,
+        "type": "bargauge",
+        "title": "Response Size Distribution",
+        "gridPos": {"h": 6, "w": 8, "x": 16, "y": 14},
+        "targets": [
+          {
+            "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+            "expr": "sum(rate(bookend_http_response_size_bytes_sum[5m])) by (endpoint) / sum(rate(bookend_http_response_size_bytes_count[5m])) by (endpoint)",
+            "legendFormat": "{{endpoint}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "orientation": "horizontal",
+          "displayMode": "gradient"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "bytes"
+          }
+        }
+      },
+      {
+        "id": 12,
+        "type": "row",
+        "title": "Recommendation Performance",
+        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 20},
+        "collapsed": false
+      },
+      {
+        "id": 13,
+        "type": "timeseries",
+        "title": "Recommendation Requests by Model",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 21},
+        "targets": [
+          {
+            "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+            "expr": "sum(rate(bookend_recommendations_total[5m])) by (model_type, status)",
+            "legendFormat": "{{model_type}} - {{status}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 20,
+              "stacking": {"mode": "normal"}
+            },
+            "unit": "reqps"
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "table",
+            "placement": "right",
+            "calcs": ["mean", "lastNotNull"]
+          }
+        }
+      },
+      {
+        "id": 14,
+        "type": "timeseries",
+        "title": "Recommendation Latency by Model",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 21},
+        "targets": [
+          {
+            "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+            "expr": "histogram_quantile(0.95, sum(rate(bookend_recommendation_latency_seconds_bucket[5m])) by (le, model_type)) * 1000",
+            "legendFormat": "p95 - {{model_type}}",
+            "refId": "A"
+          },
+          {
+            "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+            "expr": "sum(rate(bookend_recommendation_latency_seconds_sum[5m])) by (model_type) / sum(rate(bookend_recommendation_latency_seconds_count[5m])) by (model_type) * 1000",
+            "legendFormat": "avg - {{model_type}}",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth"
+            },
+            "unit": "ms"
+          }
+        }
+      },
+      {
+        "id": 15,
+        "type": "stat",
+        "title": "Recommendation Success Rate",
+        "gridPos": {"h": 4, "w": 8, "x": 0, "y": 29},
+        "targets": [
+          {
+            "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+            "expr": "sum(rate(bookend_recommendations_total{status=\"success\"}[5m])) / sum(rate(bookend_recommendations_total[5m])) * 100",
+            "legendFormat": "Success %",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "decimals": 2,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": null, "color": "red"},
+                {"value": 90, "color": "yellow"},
+                {"value": 95, "color": "green"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 16,
+        "type": "stat",
+        "title": "Avg Items per Recommendation",
+        "gridPos": {"h": 4, "w": 8, "x": 8, "y": 29},
+        "targets": [
+          {
+            "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+            "expr": "sum(rate(bookend_recommendation_items_count_sum[5m])) / sum(rate(bookend_recommendation_items_count_count[5m]))",
+            "legendFormat": "Items",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "decimals": 1
+          }
+        }
+      },
+      {
+        "id": 17,
+        "type": "gauge",
+        "title": "Avg Recommendation Score",
+        "gridPos": {"h": 4, "w": 8, "x": 16, "y": 29},
+        "targets": [
+          {
+            "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+            "expr": "sum(rate(bookend_recommendation_score_distribution_sum[5m])) / sum(rate(bookend_recommendation_score_distribution_count[5m]))",
+            "legendFormat": "Score",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "none",
+            "min": 0,
+            "max": 1,
+            "decimals": 3,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 0.5, "color": "yellow"},
+                {"value": 0.7, "color": "green"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 18,
+        "type": "row",
+        "title": "Model Health & Performance",
+        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 33},
+        "collapsed": false
+      },
+      {
+        "id": 19,
+        "type": "stat",
+        "title": "Model Fitted Status",
+        "gridPos": {"h": 4, "w": 24, "x": 0, "y": 34},
+        "targets": [
+          {
+            "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+            "expr": "bookend_model_is_fitted",
+            "legendFormat": "{{model_type}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "none",
+          "colorMode": "background",
+          "textMode": "name"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {"type": "value", "options": {"0": {"text": "Not Fitted", "color": "red"}}},
+              {"type": "value", "options": {"1": {"text": "Fitted", "color": "green"}}}
+            ]
+          }
+        }
+      },
+      {
+        "id": 20,
+        "type": "timeseries",
+        "title": "Model Fit Duration",
+        "gridPos": {"h": 6, "w": 12, "x": 0, "y": 38},
+        "targets": [
+          {
+            "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+            "expr": "sum(rate(bookend_model_fit_duration_seconds_sum[5m])) by (model_type) / sum(rate(bookend_model_fit_duration_seconds_count[5m])) by (model_type)",
+            "legendFormat": "{{model_type}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {"drawStyle": "bars", "fillOpacity": 80},
+            "unit": "s"
+          }
+        }
+      },
+      {
+        "id": 21,
+        "type": "timeseries",
+        "title": "Model Predict Duration",
+        "gridPos": {"h": 6, "w": 12, "x": 12, "y": 38},
+        "targets": [
+          {
+            "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+            "expr": "histogram_quantile(0.95, sum(rate(bookend_model_predict_duration_seconds_bucket[5m])) by (le, model_type)) * 1000",
+            "legendFormat": "p95 - {{model_type}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {"drawStyle": "line", "fillOpacity": 20},
+            "unit": "ms"
+          }
+        }
+      },
+      {
+        "id": 22,
+        "type": "row",
+        "title": "Database & Cache Performance",
+        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 44},
+        "collapsed": false
+      },
+      {
+        "id": 23,
+        "type": "stat",
+        "title": "Active DB Connections",
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 45},
+        "targets": [
+          {
+            "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+            "expr": "bookend_db_connections_active",
+            "legendFormat": "Connections",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": null, "color": "green"},
+                {"value": 50, "color": "yellow"},
+                {"value": 80, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 24,
+        "type": "timeseries",
+        "title": "Database Query Latency",
+        "gridPos": {"h": 6, "w": 9, "x": 6, "y": 45},
+        "targets": [
+          {
+            "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+            "expr": "histogram_quantile(0.95, sum(rate(bookend_db_query_duration_seconds_bucket[5m])) by (le, query_type)) * 1000",
+            "legendFormat": "p95 - {{query_type}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {"drawStyle": "line", "fillOpacity": 10},
+            "unit": "ms"
+          }
+        }
+      },
+      {
+        "id": 25,
+        "type": "timeseries",
+        "title": "Cache Hit Rate",
+        "gridPos": {"h": 6, "w": 9, "x": 15, "y": 45},
+        "targets": [
+          {
+            "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+            "expr": "sum(rate(bookend_cache_hits_total[5m])) by (cache_type) / (sum(rate(bookend_cache_hits_total[5m])) by (cache_type) + sum(rate(bookend_cache_misses_total[5m])) by (cache_type)) * 100",
+            "legendFormat": "{{cache_type}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {"drawStyle": "line", "fillOpacity": 20},
+            "unit": "percent",
+            "min": 0,
+            "max": 100
+          }
+        }
+      },
+      {
+        "id": 26,
+        "type": "timeseries",
+        "title": "Database Errors",
+        "gridPos": {"h": 4, "w": 12, "x": 0, "y": 51},
+        "targets": [
+          {
+            "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+            "expr": "sum(rate(bookend_db_errors_total[5m])) by (error_type)",
+            "legendFormat": "{{error_type}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {"drawStyle": "bars", "fillOpacity": 80},
+            "unit": "errors/s"
+          }
+        }
+      },
+      {
+        "id": 27,
+        "type": "stat",
+        "title": "Cache Size",
+        "gridPos": {"h": 4, "w": 12, "x": 12, "y": 51},
+        "targets": [
+          {
+            "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+            "expr": "bookend_cache_size_bytes",
+            "legendFormat": "{{cache_type}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "bytes"
+          }
+        }
+      },
+      {
+        "id": 28,
+        "type": "row",
+        "title": "User Activity & Errors",
+        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 55},
+        "collapsed": false
+      },
+      {
+        "id": 29,
+        "type": "timeseries",
+        "title": "User Interactions by Type",
+        "gridPos": {"h": 6, "w": 12, "x": 0, "y": 56},
+        "targets": [
+          {
+            "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+            "expr": "sum(rate(bookend_user_interactions_total[5m])) by (event_type)",
+            "legendFormat": "{{event_type}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {"drawStyle": "line", "fillOpacity": 20, "stacking": {"mode": "normal"}},
+            "unit": "events/s"
+          }
+        }
+      },
+      {
+        "id": 30,
+        "type": "timeseries",
+        "title": "Total Errors by Type",
+        "gridPos": {"h": 6, "w": 12, "x": 12, "y": 56},
+        "targets": [
+          {
+            "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+            "expr": "sum(rate(bookend_errors_total[5m])) by (error_type, severity)",
+            "legendFormat": "{{error_type}} ({{severity}})",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {"drawStyle": "bars", "fillOpacity": 80},
+            "unit": "errors/s"
+          }
+        },
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {"params": [10], "type": "gt"},
+              "operator": {"type": "and"},
+              "query": {"params": ["A", "5m", "now"]},
+              "reducer": {"params": [], "type": "avg"},
+              "type": "query"
+            }
+          ],
+          "executionErrorState": "alerting",
+          "frequency": "1m",
+          "handler": 1,
+          "name": "High Error Rate Alert",
+          "noDataState": "no_data",
+          "notifications": []
+        }
+      },
+      {
+        "id": 31,
+        "type": "table",
+        "title": "Exception Summary (Last 5m)",
+        "gridPos": {"h": 6, "w": 24, "x": 0, "y": 62},
+        "targets": [
+          {
+            "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+            "expr": "topk(10, sum(increase(bookend_exceptions_total[5m])) by (exception_type, module))",
+            "legendFormat": "{{exception_type}} - {{module}}",
+            "refId": "A",
+            "format": "table",
+            "instant": true
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {"Time": true},
+              "renameByName": {
+                "exception_type": "Exception Type",
+                "module": "Module",
+                "Value": "Count"
+              }
+            }
+          }
+        ],
+        "options": {
+          "showHeader": true,
+          "sortBy": [{"desc": true, "displayName": "Count"}]
+        }
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "DS_PROMETHEUS",
+          "type": "datasource",
+          "query": "prometheus",
+          "current": {
+            "value": "prometheus",
+            "text": "Prometheus"
+          }
+        },
+        {
+          "name": "model_type",
+          "type": "query",
+          "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+          "query": "label_values(bookend_recommendations_total, model_type)",
+          "current": {
+            "value": "all",
+            "text": "All"
+          },
+          "multi": true,
+          "includeAll": true,
+          "refresh": 1
+        },
+        {
+          "name": "endpoint",
+          "type": "query",
+          "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+          "query": "label_values(bookend_http_requests_total, endpoint)",
+          "current": {
+            "value": "all",
+            "text": "All"
+          },
+          "multi": true,
+          "includeAll": true,
+          "refresh": 1
+        }
+      ]
+    }
+  },
+  "overwrite": true
+}

@@ -1,0 +1,186 @@
+# model config yaml placeholder
+# Bookend Recommendation System - Model Configuration
+# This file defines hyperparameters and settings for all recommendation models
+
+# Model versions and metadata
+metadata:
+  version: "0.1.1"
+  last_updated: "2025-11-08"
+  author: "Lunaflow"
+
+# ---------------------------------------------------------
+# Collaborative Filtering Models
+# ---------------------------------------------------------
+collaborative:
+  user_cf:
+    similarity_metric: "cosine"  # Options: cosine, jaccard, pearson
+    k_neighbors: 20
+    min_common_items: 3
+    normalize: true
+    
+  item_cf:
+    similarity_metric: "cosine"
+    k_neighbors: 50
+    min_common_users: 5
+    normalize: true
+
+# ---------------------------------------------------------
+# Hybrid Recommender
+# ---------------------------------------------------------
+hybrid:
+  weights:
+    user_cf: 0.3
+    item_cf: 0.3
+    recency: 0.2
+    context: 0.2
+  
+  mmr:
+    lambda: 0.5  # 0 = diversity, 1 = relevance
+    top_k: 10
+  
+  context:
+    time_weight: 0.3
+    device_weight: 0.2
+    location_weight: 0.1
+
+# ---------------------------------------------------------
+# Ambient Recommendation (light contextual suggestions)
+# ---------------------------------------------------------
+ambient:
+  layout_positions: 6
+  refresh_interval_hours: 24
+  personalization_strength: 0.7
+  context_awareness: 0.8
+
+# ---------------------------------------------------------
+# Temporal Flow (recency & activity patterns)
+# ---------------------------------------------------------
+temporal:
+  time_slots: 24
+  recency_decay: 0.95
+  lookback_days: 30
+  min_events: 5
+
+# ---------------------------------------------------------
+# Soft Loop (detect repetitive patterns)
+# ---------------------------------------------------------
+soft_loop:
+  window_size: 7
+  repetition_threshold: 0.7
+  diversity_boost: 0.3
+  max_same_item_count: 3
+
+# ---------------------------------------------------------
+# Context Echo (tone/style-aware recommendations)
+# ---------------------------------------------------------
+context_echo:
+  tone_categories:
+    - formal
+    - casual
+    - professional
+    - creative
+    - technical
+  tone_weight: 0.6
+  style_similarity_threshold: 0.5
+  embed_dim: 128
+
+# ---------------------------------------------------------
+# Echo Feedback (adaptive preference tuning)
+# ---------------------------------------------------------
+echo_feedback:
+  session_memory_items: 10
+  feedback_decay: 0.9
+  positive_boost: 1.2
+  negative_penalty: 0.5
+
+# ---------------------------------------------------------
+# Ghost Preview (real-time predictive recommendations)
+# ---------------------------------------------------------
+ghost_preview:
+  real_time_top_k: 5
+  context_window_chars: 500
+  trigger_min_length: 50
+
+# ---------------------------------------------------------
+# Quiet Growth (user progress tracking)
+# ---------------------------------------------------------
+quiet_growth:
+  metrics:
+    - paraphrase_count
+    - avg_sentence_length
+    - tone_diversity
+    - vocabulary_richness
+  tracking_period_days: 90
+  milestone_thresholds:
+    beginner: 10
+    intermediate: 50
+    advanced: 200
+
+# ---------------------------------------------------------
+# Feature Engineering
+# ---------------------------------------------------------
+features:
+  user:
+    - total_paraphrases
+    - avg_response_time
+    - preferred_tone
+    - preferred_maintenance
+    - active_hours
+    - device_preference
+    - last_7d_count
+    - last_30d_count
+  
+  item:
+    - popularity_score
+    - quality_score
+    - category
+    - avg_rating
+    - usage_frequency
+
+# ---------------------------------------------------------
+# Training Configuration
+# ---------------------------------------------------------
+training:
+  batch_size: 256
+  learning_rate: 0.001
+  epochs: 50
+  validation_split: 0.2
+  early_stopping_patience: 5
+  checkpoint_dir: "data/models/checkpoints"
+
+# ---------------------------------------------------------
+# Evaluation Metrics
+# ---------------------------------------------------------
+evaluation:
+  metrics:
+    - precision@5
+    - precision@10
+    - recall@5
+    - recall@10
+    - ndcg@10
+    - diversity@10
+    - coverage
+  test_split: 0.2
+  min_test_samples: 100
+
+# ---------------------------------------------------------
+# Caching Strategy
+# ---------------------------------------------------------
+cache:
+  user_features_ttl: 3600       # 1 hour
+  recommendations_ttl: 1800     # 30 minutes
+  model_predictions_ttl: 600    # 10 minutes
+  similarity_matrix_ttl: 86400  # 24 hours
+
+# ---------------------------------------------------------
+# A/B Testing
+# ---------------------------------------------------------
+ab_test:
+  enabled: false
+  test_groups:
+    - name: control
+      weight: 0.5
+      config: default
+    - name: treatment
+      weight: 0.5
+      config: high_diversity
