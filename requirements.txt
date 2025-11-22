@@ -1,270 +1,32 @@
-# =========================================================
-# 🌿 Bookend Recommendation System - Python Dependencies
-# Version: 0.2.0
-# Updated: 2025-11-08
-# Philosophy: "자연을 담다" - Natural, Clean, Production-Ready
-# =========================================================
+# Web Framework
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+pydantic==2.9.0
+pydantic-settings==2.6.0
+python-multipart==0.0.17
+gunicorn==23.0.0
 
-# ---------------------------------------------------------
-# 🐍 Python Version Requirement
-# ---------------------------------------------------------
-# python>=3.11,<3.13
+# Data Processing
+pandas==2.2.3
+numpy==2.1.3
+scikit-learn==1.5.2
+scipy==1.14.1
+joblib==1.4.2
 
-# ---------------------------------------------------------
-# 🚀 Web Framework & API
-# ---------------------------------------------------------
-fastapi==0.115.0                    # Modern async API framework
-uvicorn[standard]==0.32.0           # ASGI server with websockets
-pydantic==2.9.0                     # Data validation
-pydantic-settings==2.6.0            # Settings management
-python-multipart==0.0.17            # Form data parsing
-starlette==0.40.0                   # ASGI toolkit (FastAPI dependency)
+# Database
+sqlalchemy==2.0.35
+asyncpg==0.30.0
+psycopg2-binary==2.9.10
 
-# ---------------------------------------------------------
-# 🗄️ Database & ORM
-# ---------------------------------------------------------
-sqlalchemy==2.0.35                  # SQL toolkit and ORM
-asyncpg==0.30.0                     # Async PostgreSQL driver
-psycopg2-binary==2.9.10            # Sync PostgreSQL driver
-alembic==1.14.0                     # Database migrations
-greenlet==3.1.1                     # SQLAlchemy async support
+# Storage & Cache
+minio==7.2.9
+redis==5.2.0
 
-# ---------------------------------------------------------
-# ⚡ Caching & Performance
-# ---------------------------------------------------------
-redis==5.2.0                        # Redis client
-hiredis==3.0.0                      # Redis protocol parser (C extension)
-cachetools==5.5.0                   # Caching utilities
+# Config & Logging
+pyyaml==6.0.2
+python-dotenv==1.0.1
+python-json-logger==3.2.1
 
-# ---------------------------------------------------------
-# 📦 Object Storage
-# ---------------------------------------------------------
-minio==7.2.9                        # S3-compatible object storage
-boto3==1.35.50                      # AWS SDK (for S3 compatibility)
-botocore==1.35.50                   # AWS core library
-
-# ---------------------------------------------------------
-# 📊 Data Processing
-# ---------------------------------------------------------
-pandas==2.2.3                       # Data manipulation
-numpy==2.1.3                        # Numerical computing
-pyarrow==18.1.0                     # Columnar data format
-openpyxl==3.1.5                     # Excel file support
-python-dateutil==2.9.0              # Date utilities
-
-# ---------------------------------------------------------
-# 🤖 Machine Learning & Recommendations
-# ---------------------------------------------------------
-scikit-learn==1.5.2                 # ML algorithms
-scipy==1.14.1                       # Scientific computing
-joblib==1.4.2                       # Model serialization
-implicit==0.7.2                     # Collaborative filtering (ALS, BPR)
-
-# ---------------------------------------------------------
-# 📈 Visualization & Dashboard
-# ---------------------------------------------------------
-streamlit==1.40.1                   # Dashboard framework
-plotly==5.24.1                      # Interactive charts
-altair==5.4.1                       # Declarative visualization
-matplotlib==3.9.2                   # Static plotting
-seaborn==0.13.2                     # Statistical visualization
-
-# ---------------------------------------------------------
-# ⚙️ Configuration & Environment
-# ---------------------------------------------------------
-pyyaml==6.0.2                       # YAML parser
-python-dotenv==1.0.1                # .env file support
-toml==0.10.2                        # TOML parser
-
-# ---------------------------------------------------------
-# 📝 Logging & Monitoring
-# ---------------------------------------------------------
-python-json-logger==3.2.1           # JSON logging
-structlog==24.4.0                   # Structured logging
-prometheus-client==0.21.0           # Prometheus metrics
-
-# ---------------------------------------------------------
-# 🔐 Security & Authentication
-# ---------------------------------------------------------
-python-jose[cryptography]==3.3.0    # JWT tokens
-passlib[bcrypt]==1.7.4              # Password hashing
-cryptography==43.0.3                # Cryptographic recipes
-pyjwt==2.9.0                        # JSON Web Tokens
-
-# ---------------------------------------------------------
-# 🌐 HTTP & Networking
-# ---------------------------------------------------------
-httpx==0.27.2                       # Async HTTP client
-requests==2.32.3                    # Sync HTTP client
-urllib3==2.2.3                      # HTTP library
-aiohttp==3.10.11                    # Async HTTP framework
-
-# ---------------------------------------------------------
-# 🧪 Testing
-# ---------------------------------------------------------
-pytest==8.3.3                       # Testing framework
-pytest-asyncio==0.24.0              # Async test support
-pytest-cov==6.0.0                   # Coverage reports
-pytest-mock==3.14.0                 # Mocking utilities
-faker==30.8.2                       # Fake data generation
-factory-boy==3.3.1                  # Test fixtures
-
-# ---------------------------------------------------------
-# 🎨 Code Quality & Formatting
-# ---------------------------------------------------------
-ruff==0.7.4                         # Fast Python linter
-black==24.10.0                      # Code formatter
-isort==5.13.2                       # Import sorter
-mypy==1.13.0                        # Static type checker
-pylint==3.3.1                       # Python linter
-flake8==7.1.1                       # Style guide enforcement
-
-# Type stubs for mypy
-types-requests==2.32.0.20241016
-types-redis==4.6.0.20241004
-types-PyYAML==6.0.12.20240917
-types-python-dateutil==2.9.0.20241003
-
-# ---------------------------------------------------------
-# 📦 Build & Distribution
-# ---------------------------------------------------------
-setuptools==75.3.0                  # Package installer
-wheel==0.44.0                       # Built distribution format
-pip-tools==7.4.1                    # Requirements management
-
-# ---------------------------------------------------------
-# 🔧 Development Utilities
-# ---------------------------------------------------------
-ipython==8.29.0                     # Enhanced Python shell
-ipdb==0.13.13                       # IPython debugger
-rich==13.9.4                        # Pretty terminal output
-tqdm==4.67.0                        # Progress bars
-click==8.1.7                        # CLI creation
-
-# ---------------------------------------------------------
-# 📄 Documentation (Optional)
-# ---------------------------------------------------------
-# sphinx==8.1.3                     # Documentation generator
-# sphinx-rtd-theme==3.0.2           # ReadTheDocs theme
-# mkdocs==1.6.1                     # MkDocs documentation
-# mkdocs-material==9.5.44           # Material theme
-
-# ---------------------------------------------------------
-# 🚢 Production Deployment (Optional)
-# ---------------------------------------------------------
-gunicorn==23.0.0                    # WSGI HTTP server
-gevent==24.11.1                     # Coroutine networking
-watchfiles==0.24.0                  # File watching
-
-# ---------------------------------------------------------
-# 📊 Analytics & Tracking (Optional)
-# ---------------------------------------------------------
-# mixpanel==4.10.1                  # Mixpanel integration
-# segment-analytics-python==2.3.2   # Segment integration
-
-# ---------------------------------------------------------
-# 🔄 Task Queue (Optional for Phase 2)
-# ---------------------------------------------------------
-# celery==5.4.0                     # Distributed task queue
-# flower==2.0.1                     # Celery monitoring
-
-# ---------------------------------------------------------
-# 🎯 Specific Bookend Features
-# ---------------------------------------------------------
-# Natural language processing (if needed for Context Echo)
-# transformers==4.46.3              # Hugging Face transformers
-# sentence-transformers==3.3.1      # Sentence embeddings
-# tokenizers==0.20.3                # Fast tokenizers
-
-# Time series analysis (for Temporal Flow)
-statsmodels==0.14.4                 # Statistical models
-
-# Network analysis (for Soft Loop visualization)
-networkx==3.4.2                     # Graph analysis
-
-# ---------------------------------------------------------
-# 📌 Pin Critical Dependencies (Security)
-# ---------------------------------------------------------
-certifi>=2024.8.30                  # SSL certificates
-setuptools>=75.0.0                  # Security fixes
-urllib3>=2.2.3,<3                   # Security updates
-
-# ---------------------------------------------------------
-# 🌿 Natural Design Principles
-# ---------------------------------------------------------
-# This requirements file follows Bookend's philosophy:
-# 1. Minimal but Complete - Only essential packages
-# 2. Version Pinned - Reproducible environments
-# 3. Well Organized - Clear categorization
-# 4. Production Ready - Security and stability first
-# 5. Growth Oriented - Easy to extend
-
-# ---------------------------------------------------------
-# 📝 Installation Instructions
-# ---------------------------------------------------------
-# Basic installation:
-#   pip install -r requirements.txt
-#
-# Development installation:
-#   pip install -r requirements.txt
-#   pip install -r requirements-dev.txt  # If separated
-#
-# Production installation:
-#   pip install --no-cache-dir -r requirements.txt
-#
-# Update all packages:
-#   pip install --upgrade -r requirements.txt
-#
-# Create requirements lock file:
-#   pip-compile requirements.in -o requirements.txt
-#
-# Sync environment:
-#   pip-sync requirements.txt
-
-# ---------------------------------------------------------
-# 🔒 Security Notes
-# ---------------------------------------------------------
-# Run security audit:
-#   pip install safety
-#   safety check -r requirements.txt
-#
-# Check for outdated packages:
-#   pip list --outdated
-#
-# Update specific package:
-#   pip install --upgrade package-name
-
-# ---------------------------------------------------------
-# 🐳 Docker Optimization
-# ---------------------------------------------------------
-# For Docker builds, install in this order:
-# 1. System dependencies (OS level)
-# 2. Python dependencies (this file)
-# 3. Application code
-# Use multi-stage builds to reduce image size
-
-# ---------------------------------------------------------
-# 🎯 Performance Tips
-# ---------------------------------------------------------
-# 1. Use --no-cache-dir in production
-# 2. Install binary wheels when available
-# 3. Consider using manylinux wheels
-# 4. Use virtual environments (venv/conda)
-# 5. Keep dependencies up to date for security
-
-# ---------------------------------------------------------
-# 📊 Size Optimization
-# ---------------------------------------------------------
-# To reduce installation size:
-# 1. Remove test dependencies in production
-# 2. Use slim base images (python:3.11-slim)
-# 3. Clean pip cache after install
-# 4. Use alpine linux for minimal size (if compatible)
-
-# ---------------------------------------------------------
-# End of Requirements
-# 🌿 May your code grow naturally and sustainably
-# ---------------------------------------------------------
-
-# npm install nspell hangul-js
-# npm install nspell
+# HTTP
+httpx==0.27.2
+aiohttp==3.10.11
