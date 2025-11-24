@@ -1,27 +1,7 @@
 # package config
 """
 Configuration package for Bookend Recommendation System.
-
-This package manages:
-- Environment-specific settings (DEV/PROD)
-- Database connections (PostgreSQL)
-- Storage configurations (MinIO, Redis)
-- Logging setup
-- Model configurations
-
-Usage:
-    >>> from config import get_settings, get_storage, setup_logging
-    >>> 
-    >>> # Setup logging
-    >>> setup_logging()
-    >>> 
-    >>> # Get settings
-    >>> settings = get_settings()
-    >>> print(settings.environment)
-    >>> 
-    >>> # Get storage manager
-    >>> storage = get_storage()
-    >>> storage.save_model(model, "ambient", "v1.0.0")
+...
 """
 
 # Core settings
@@ -42,7 +22,8 @@ from .logging_config import (
 from .database import (
     get_db,
     get_session,
-    DatabaseConnection
+    DatabaseConnection,
+    session_scope,   
 )
 
 # Storage backends
@@ -81,6 +62,7 @@ __all__ = [
     "get_db",
     "get_session",
     "DatabaseConnection",
+    "session_scope",   
     
     # Storage
     "get_minio",
