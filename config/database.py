@@ -6,6 +6,7 @@ from sqlalchemy import create_engine, text, event
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.engine import Engine
 from sqlalchemy.pool import QueuePool
+from contextlib import contextmanager
 
 from config.settings import get_settings
 
@@ -164,6 +165,19 @@ class DatabaseConnection:
             raise
         finally:
             session.close()
+
+    @contextmanager
+    def session_scope():
+        """Provide a transactional scope around a series of operations."""
+        db = SessionLocal()
+        try:
+            yield db
+            db.commit()
+        except:
+            db.rollback()
+            raise
+        finally:
+            db.close()
     
     def health_check(self) -> dict[str, any]:
         """
