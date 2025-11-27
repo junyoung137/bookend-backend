@@ -1,4 +1,5 @@
-# src/ace/db/handler.py
+# src/ace/db/handler.py (상단에 추가)
+
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import json
@@ -17,6 +18,59 @@ DB_CONFIG = settings.ace.db_config
 def get_db_connection():
     """DB 연결 헬퍼 함수"""
     return psycopg2.connect(**DB_CONFIG)
+
+def init_db():
+    """DB 초기화 - feedback 테이블 생성"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # feedbacks 테이블 생성
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS feedbacks (
+                id SERIAL PRIMARY KEY,
+                user_id TEXT,
+                original TEXT NOT NULL,
+                selected_feature TEXT NOT NULL,
+                corrected_text TEXT NOT NULL,
+                feedback TEXT NOT NULL,
+                context JSONB,
+                timestamp TIMESTAMP NOT NULL,
+                processed BOOLEAN DEFAULT FALSE,
+                processed_at TIMESTAMP
+            );
+        ''')
+
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_user_id ON feedbacks(user_id);')
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_processed ON feedbacks(processed);')
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_timestamp ON feedbacks(timestamp);')
+        
+        # insights_queue 테이블 생성
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS insights_queue (
+                id SERIAL PRIMARY KEY,
+                feedback_id INTEGER REFERENCES feedbacks(id),
+                user_id TEXT,
+                segment TEXT,
+                feature TEXT,
+                issue TEXT,
+                cause TEXT,
+                suggestion TEXT,
+                timestamp TIMESTAMP NOT NULL,
+                processed BOOLEAN DEFAULT FALSE
+            );
+        ''')
+        
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_insights_processed ON insights_queue(processed);')
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        print("✅ PostgreSQL 테이블 초기화 완료!")
+        
+    except Exception as e:
+        print(f"⚠️ DB 초기화 실패 (이미 존재할 수 있음): {e}")
 
 def has_user_feedback(user_id):
     """사용자가 피드백을 남긴 적 있는지 확인"""
@@ -149,6 +203,65 @@ def save_feedback(feedback_data):
     
     return feedback_id
 
+def get_new_feedbacks():
+    """DB에서 미처리 피드백 조회"""
+    conn = get_db_connection()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    
+    cursor.execute('''
+        SELECT id, user_id, original, selected_feature,
+               corrected_text, feedback, context, timestamp
+        FROM feedbacks
+        WHERE processed = FALSE
+        ORDER BY timestamp ASC
+    ''')
+    
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    
+    feedbacks = [dict(row) for row in rows]
+    print(f"📥 미처리 피드백 {len(feedbacks)}개 조회")
+    return feedbacks
+
+def mark_as_processed(feedback_ids):
+    """피드백을 처리 완료 상태로 표시"""
+    if not feedback_ids:
+        return
+        
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        UPDATE feedbacks
+        SET processed = TRUE,
+            processed_at = %s
+        WHERE id = ANY(%s)
+    ''', (datetime.now(), feedback_ids))
+    
+    conn.commit()
+    cursor.close()
+    conn.close()
+    
+    print(f"✅ {len(feedback_ids)}개 피드백 처리 완료 표시")
+
+def get_all_feedbacks():
+    """DB에서 모든 피드백 조회 (테스트용)"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        SELECT id, user_id, feedback, processed, timestamp
+        FROM feedbacks
+        ORDER BY timestamp DESC
+    ''')
+    
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    
+    return rows
+
 def save_feedback_and_process(feedback_data):
     """피드백 저장 + 즉시 ACE 파이프라인 실행"""
     
@@ -175,7 +288,6 @@ def save_feedback_and_process(feedback_data):
             collector = Collector(api_key=API_KEY_G)
             collector.process_insights()
 
-            from src.ace.db.handler import mark_as_processed
             mark_as_processed([feedback_id])
             return True
         else:
@@ -187,24 +299,3 @@ def save_feedback_and_process(feedback_data):
         import traceback
         traceback.print_exc()
         return False
-
-def mark_as_processed(feedback_ids):
-    """피드백을 처리 완료 상태로 표시"""
-    if not feedback_ids:
-        return
-        
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    cursor.execute('''
-        UPDATE feedbacks
-        SET processed = TRUE,
-            processed_at = %s
-        WHERE id = ANY(%s)
-    ''', (datetime.now(), feedback_ids))
-    
-    conn.commit()
-    cursor.close()
-    conn.close()
-    
-    print(f"✅ {len(feedback_ids)}개 피드백 처리 완료 표시")
