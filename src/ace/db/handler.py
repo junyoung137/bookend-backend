@@ -1,4 +1,4 @@
-# src/ace/db/handler.py (상단에 추가)
+# src/ace/db/handler.py
 
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -25,7 +25,6 @@ def init_db():
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # feedbacks 테이블 생성
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS feedbacks (
                 id SERIAL PRIMARY KEY,
@@ -45,7 +44,6 @@ def init_db():
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_processed ON feedbacks(processed);')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_timestamp ON feedbacks(timestamp);')
         
-        # insights_queue 테이블 생성
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS insights_queue (
                 id SERIAL PRIMARY KEY,
@@ -70,7 +68,7 @@ def init_db():
         print("✅ PostgreSQL 테이블 초기화 완료!")
         
     except Exception as e:
-        print(f"⚠️ DB 초기화 실패 (이미 존재할 수 있음): {e}")
+        print(f"⚠️ DB 초기화 실패: {e}")
 
 def has_user_feedback(user_id):
     """사용자가 피드백을 남긴 적 있는지 확인"""
@@ -109,10 +107,7 @@ def correct_with_personalization(
     """
     개인화된 문장 교정 (통합 진입점)
     
-    흐름:
-    1. 피드백 없으면 → backend_skip 반환 (프론트엔드 처리)
-    2. 피드백 있으면 → Groq 개인화 교정
-    3. Groq 실패 → groq_failed 반환 (프론트엔드 폴백)
+    ⚠️ 임시: Groq API 문제로 모든 요청을 프론트엔드로 리다이렉트
     """
     
     print(f"\n{'='*60}")
@@ -121,59 +116,23 @@ def correct_with_personalization(
     
     has_feedback = has_user_feedback(user_id)
     
-    # ===== 1. 피드백 없음 → 백엔드 스킵 =====
-    if not has_feedback:
-        print(f"📝 피드백 없음 → 프론트엔드에서 HuggingFace 처리")
-        return {
-            'corrected': text,
-            'method': 'backend_skip',
-            'rules_applied': 0,
-            'confidence': 0.0,
-            'message': '프론트엔드에서 HuggingFace 사용 필요'
-        }
+    if has_feedback:
+        print(f"✅ 피드백 {has_feedback}개 있음")
+    else:
+        print(f"📝 피드백 없음")
     
-    # ===== 2. 피드백 있음 → Groq 개인화 교정 =====
-    print(f"✨ Groq 개인화 교정 실행 (피드백 기반)")
+    print("⚠️ 백엔드 스킵 → 프론트엔드 HuggingFace 사용")
     
-    try:
-        from src.ace.evaluator.sentence_evaluator import Evaluator
-        
-        API_KEY_G = settings.ace.groq_api_key
-        
-        evaluator = Evaluator(
-            api_key=API_KEY_G,
-            rulebook_path=rulebook_path
-        )
-        
-        result = evaluator.correct(
-            original_text=text,
-            feature=feature,
-            tone=tone,
-            genre=genre,
-            min_confidence=0.5
-        )
-        
-        return {
-            'corrected': result['corrected'],
-            'method': 'personalized',
-            'rules_applied': result['rules_applied'],
-            'confidence': result['confidence']
-        }
-        
-    except Exception as e:
-        print(f"⚠️ Groq 개인화 교정 실패: {e}")
-        import traceback
-        traceback.print_exc()
-        
-        # ===== 3. Groq 실패 → 프론트엔드 폴백 지시 =====
-        return {
-            'corrected': text,
-            'method': 'groq_failed',
-            'rules_applied': 0,
-            'confidence': 0.0,
-            'error': str(e),
-            'message': '프론트엔드 HuggingFace 폴백 필요'
-        }
+    # ===== 모든 경우 프론트엔드 처리 (Groq 비활성화) =====
+    return {
+        'corrected': text,
+        'method': 'backend_skip',
+        'use_frontend': True,  # ✅ 프론트엔드 사용 플래그
+        'rules_applied': 0,
+        'confidence': 0.0,
+        'has_feedback': has_feedback,
+        'message': 'Use HuggingFace on frontend'
+    }
 
 def save_feedback(feedback_data):
     """DB에 피드백 저장"""
@@ -263,36 +222,13 @@ def get_all_feedbacks():
     return rows
 
 def save_feedback_and_process(feedback_data):
-    """피드백 저장 + 즉시 ACE 파이프라인 실행"""
+    """피드백 저장 (분석은 임시 비활성화)"""
     
     try:
         feedback_id = save_feedback(feedback_data)
         print(f"✅ 피드백 저장 (ID: {feedback_id})")
-        
-        print("🔍 Groq 분석 시작...")
-        
-        API_KEY_G = settings.ace.groq_api_key
-        
-        from src.ace.analyzer.feedback_analyzer import Analyzer
-        
-        analyzer = Analyzer(api_key=API_KEY_G)
-        
-        feedback_data['id'] = feedback_id
-        insights = analyzer.batch_analyze([feedback_data])
-        
-        if insights:
-            print(f"💡 인사이트 생성: {len(insights)}개")
-            analyzer.export_for_collector()
-
-            from src.ace.collector.rule_collector import Collector
-            collector = Collector(api_key=API_KEY_G)
-            collector.process_insights()
-
-            mark_as_processed([feedback_id])
-            return True
-        else:
-            print("⚠️ 인사이트 생성 실패")
-            return False
+        print("⚠️ Groq API 문제로 분석 스킵")
+        return True
             
     except Exception as e:
         print(f"❌ 처리 중 오류: {e}")
