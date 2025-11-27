@@ -99,6 +99,48 @@ class MinIOSettings(BaseSettings):
     )
 
 
+class ACESettings(BaseSettings): 
+    """ACE (Analyze-Collect-Evaluate) system configuration."""
+
+    # Groq API
+    groq_api_key: str = Field(default="", description="Groq API key for LLM")
+
+    # Hugging Face API
+    huggingface_api_key: str = Field(default="", description="Hugging Face API key for LLM basic transformation")
+
+    # PostgreSQL for feedback storage
+    db_host: str = Field(default="localhost", description="ACE database host")
+    db_port: int = Field(default=5432, ge=1, le=65535, description="ACE database port")
+    db_name: str = Field(default="bookend_ace", description="ACE database name")
+    db_user: str = Field(default="ace_admin", description="ACE database user")
+    db_password: str = Field(default="", description="ACE database password")
+
+    # Thresholds
+    confidence_threshold: float = Field(
+        default=0.5, 
+        ge=-1.0, 
+        le=1.0, 
+        description="Minimum confidence for DO rules (range: -1.0 to 1.0, negative = AVOID)"
+    )
+
+    @property
+    def db_config(self) -> dict:
+        """Generate database config dict for psycopg2."""
+        return {
+            'host': self.db_host,
+            'port': self.db_port,
+            'database': self.db_name,
+            'user': self.db_user,
+            'password': self.db_password
+        }
+    
+    model_config = SettingsConfigDict(
+        env_prefix="ACE_",
+        case_sensitive=False,
+        extra="ignore"
+    )
+
+
 class APISettings(BaseSettings):
     """FastAPI application configuration."""
     
@@ -153,6 +195,7 @@ class Settings(BaseSettings):
     redis: RedisSettings = Field(default_factory=lambda: RedisSettings())
     minio: MinIOSettings = Field(default_factory=lambda: MinIOSettings())
     api: APISettings = Field(default_factory=lambda: APISettings())
+    ace: ACESettings = Field(default_factory=lambda: ACESettings())
     
     # Project paths
     project_root: str = Field(default=".", description="Project root directory")
@@ -243,6 +286,7 @@ def validate_settings() -> dict[str, bool]:
         "redis": True,
         "minio": True,
         "api": True,
+        "ace": True,
         "paths": True,
     }
     
@@ -276,6 +320,19 @@ def validate_settings() -> dict[str, bool]:
     except AssertionError as e:
         results["minio"] = False
         print(f"⚠️  MinIO validation failed: {e}")
+
+    # Validate ACE 
+    try:
+        assert settings.ace.groq_api_key, "ACE Groq API key is required"
+        assert settings.ace.huggingface_api_key, "ACE Hugging Face API key is required"
+        assert settings.ace.db_host, "ACE database host is required"
+        assert settings.ace.db_port > 0, "ACE database port must be positive"
+        assert settings.ace.db_name, "ACE database name is required"
+        assert settings.ace.db_user, "ACE database user is required"
+        print("✅ ACE settings validated")
+    except AssertionError as e:
+        results["ace"] = False
+        print(f"⚠️  ACE validation failed: {e}")
     
     # Validate paths
     try:
@@ -324,6 +381,17 @@ def print_current_config():
     print(f"\n🌐 API:")
     print(f"  Host: {settings.api.host}")
     print(f"  Port: {settings.api.port}")
+
+    print(f"\n🤖 ACE Database:")
+    print(f"  Groq Key: {'*' * 20 if settings.ace.groq_api_key else '(not set)'}")
+    print(f"  HuggingFace Key: {'*' * 20 if settings.ace.huggingface_api_key else '(not set)'}")
+    print(f"  Host: {settings.ace.db_host}")
+    print(f"  Port: {settings.ace.db_port}")
+    print(f"  Name: {settings.ace.db_name}")
+    print(f"  User: {settings.ace.db_user}")
+    print(f"  Password: {'*' * len(settings.ace.db_password) if settings.ace.db_password else '(not set)'}")
+    ace_url = f"postgresql://{settings.ace.db_user}:{settings.ace.db_password}@{settings.ace.db_host}:{settings.ace.db_port}/{settings.ace.db_name}"
+    print(f"  URL: {ace_url.replace(settings.ace.db_password, '***')}")
     
     print("\n" + "="*60 + "\n")
 

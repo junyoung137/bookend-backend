@@ -1,0 +1,247 @@
+{
+  "version": "1.0.0",
+  "source": "data_1_only",
+  "description": "200개 선택 데이터 분석, 문장 품질 개선 규칙",
+  "created_at": "2025-11-21T12:09:59.560229",
+  "purpose": "LLM 문장 생성 시 프롬프트에 추가할 가이드라인",
+  "usage": "분석가/수집가가 실시간으로 업데이트",
+  "context_rules": {
+    "formal_informative": {
+      "Paraphrase": {
+        "rule_id": "R001",
+        "feature": "Paraphrase",
+        "selection_count": 137,
+        "selection_rate": 0.825,
+        "user_preference": "강력 선호 (사용자들이 자주 선택)",
+        "total_samples": 166,
+        "confidence": 0.6,
+        "source": "inferred_from_selection_data",
+        "base_constraints": [
+          "원문보다 30% 이상 짧게",
+          "핵심 정보 누락 금지",
+          "문법 오류 없이",
+          "자연스러운 흐름 유지"
+        ],
+        "examples": [
+          {
+            "original": "토노베라 이후 Vet는 컴퓨터와 페어링되어 있으며, 기기의 전원이 켜지면 Bluetooth 연결이 자동으로 다시 연결됩니다.",
+            "selected": "토노베라 이후 Vet는 컴퓨터와 페어링되어 있으며, 기기 전원을 켜면 블루투스 연결이 자동으로 재연결됩니다."
+          },
+          {
+            "original": "문의하신 2024년 11월 합병 평가액 관련 사항은 내부적으로 해당 업무를 진행하고 있지 않으며, 현재로서는 관련 내용에 대한 추가 검토 계획이...",
+            "selected": "문의하신 2024년 11월 합병 평가액 관련 사항은 내부적으로 해당 업무를 진행하지 않고 있으며, 현재 관련 내용에 대한 추가 검토 계획은 없는..."
+          },
+          {
+            "original": "평가 방법론 검증은 시가평가 기준서와 평가 메뉴얼을 기준으로 진행 할 예정이고\n\n여기에 기재되지 않은 각 부서에서 평가하는 상품에 대한 방법론에...",
+            "selected": "평가 방법론 검증은 시가평가 기준서와 평가 매뉴얼을 기준으로 진행될 예정이며, 여기에 기재되지 않은 각 부서에서 평가하는 상품에 대한 방법론 문..."
+          }
+        ]
+      },
+      "Tone Adjust": {
+        "rule_id": "R002",
+        "feature": "Tone Adjust",
+        "selection_count": 22,
+        "selection_rate": 0.133,
+        "user_preference": "비선호 (거의 선택 안 함)",
+        "total_samples": 166,
+        "confidence": 0.6,
+        "source": "inferred_from_selection_data",
+        "base_constraints": [
+          "목표 톤 100% 적용",
+          "의미 왜곡 금지",
+          "자연스러운 전환",
+          "장르 특성 유지"
+        ],
+        "examples": [
+          {
+            "original": "프롬프트는 모델 학습 또는 개선에 사용되지 않습니다.",
+            "selected": "프롬프트는 모델 학습이나 개선에 사용되지 않습니다."
+          },
+          {
+            "original": "여러 테넌트에 액세스할 수 있는 경우 상단 설정의 디렉터리 + 구독 메뉴에서 관리 하려는 테넌트를 선택합니다.",
+            "selected": "여러 테넌트에 접근 권한이 있다면, 상단 설정의 디렉터리 + 구독 메뉴에서 관리하고자 하는 테넌트를 선택하십시오."
+          },
+          {
+            "original": "대체 배터리 브랜드는 기기 측정 수명에 영향을 미칠 수 있습니다.",
+            "selected": "타사 배터리 브랜드는 장치 측정 수명에 영향을 줄 수 있습니다."
+          }
+        ]
+      },
+      "Expand": {
+        "rule_id": "R003",
+        "feature": "Expand",
+        "selection_count": 7,
+        "selection_rate": 0.042,
+        "user_preference": "비선호 (거의 선택 안 함)",
+        "total_samples": 166,
+        "confidence": 0.6,
+        "source": "inferred_from_selection_data",
+        "base_constraints": [
+          "원문 대비 30~50% 증가",
+          "구체적 디테일 우선",
+          "논리적 흐름 유지",
+          "과잉 수식 금지"
+        ],
+        "examples": [
+          {
+            "original": "켈러의 복음 이해는 바울의 갈라디아서 신학과 예수의 비유 신학에 뿌리를 둔다.\n1) 갈라디아서의 복음:\n\n바울은 “너희가 성령으로 시작하였다가 ...",
+            "selected": "켈러의 복음 이해는 바울의 갈라디아서 신학과 예수의 비유 신학에 깊이 뿌리내리고 있다. 그의 복음 이해는 다음 두 가지 핵심 관점을 통해 더욱 ..."
+          },
+          {
+            "original": "목표는 중앙 정렬 대상 바로 위에 녹색 링을 얻는 것입니다. 이는 적절한 거리와 적절한 정렬을 나타냅니다.",
+            "selected": "목표는 중앙 정렬 대상 바로 위에 녹색 링이 나타나도록 하는 것입니다. 이는 대상과의 적절한 거리와 정확한 정렬 상태를 나타냅니다."
+          },
+          {
+            "original": "애플리케이션은 이러한 응답을 정상적으로 처리해야 합니다(예: 사용자가 콘텐츠를 다시 표현하도록 권장).",
+            "selected": "애플리케이션은 이러한 응답을 정상적으로 처리해야 합니다. 예를 들어 사용자에게 콘텐츠를 다시 입력하도록 안내할 수 있습니다."
+          }
+        ]
+      }
+    },
+    "common_informative": {
+      "Paraphrase": {
+        "rule_id": "R004",
+        "feature": "Paraphrase",
+        "selection_count": 2,
+        "selection_rate": 0.4,
+        "user_preference": "선호 (꽤 자주 선택)",
+        "total_samples": 5,
+        "confidence": 0.6,
+        "source": "inferred_from_selection_data",
+        "base_constraints": [
+          "원문보다 30% 이상 짧게",
+          "핵심 정보 누락 금지",
+          "문법 오류 없이",
+          "자연스러운 흐름 유지"
+        ],
+        "examples": [
+          {
+            "original": "check out how treated with a contractual agreements project",
+            "selected": "Check out how it was handled with a contractual agreement project."
+          },
+          {
+            "original": "구매대행업을 신규로 내는거랑 기존사업자에 추가하는거랑 세금적인 부분은 차이가 없는데 구분하는데 어려움이 있어서 신규로 사업자 내야합니다",
+            "selected": "구매대행업을 신규로 사업자 등록하는 것과 기존 사업자에 추가하는 것은 세금상 차이가 없으나, 구분의 어려움 때문에 신규로 사업자를 내는 것이 좋..."
+          }
+        ]
+      },
+      "Tone Adjust": {
+        "rule_id": "R005",
+        "feature": "Tone Adjust",
+        "selection_count": 2,
+        "selection_rate": 0.4,
+        "user_preference": "선호 (꽤 자주 선택)",
+        "total_samples": 5,
+        "confidence": 0.6,
+        "source": "inferred_from_selection_data",
+        "base_constraints": [
+          "목표 톤 100% 적용",
+          "의미 왜곡 금지",
+          "자연스러운 전환",
+          "장르 특성 유지"
+        ],
+        "examples": [
+          {
+            "original": "표면을 가볍게 닦으세요.",
+            "selected": "표면을 가볍게 닦아 주세요."
+          },
+          {
+            "original": "점심시간 전후로 이용자가 많아 예약이 금방 차지만, 하루 중 7시 시간때가 좀 여유 있어요.",
+            "selected": "점심시간 전후로는 이용자가 많아 예약이 금방 마감되지만, 하루 중 7시 시간대는 비교적 여유가 있습니다."
+          }
+        ]
+      },
+      "Expand": {
+        "rule_id": "R006",
+        "feature": "Expand",
+        "selection_count": 1,
+        "selection_rate": 0.2,
+        "user_preference": "보통 (가끔 선택)",
+        "total_samples": 5,
+        "confidence": 0.6,
+        "source": "inferred_from_selection_data",
+        "base_constraints": [
+          "원문 대비 30~50% 증가",
+          "구체적 디테일 우선",
+          "논리적 흐름 유지",
+          "과잉 수식 금지"
+        ],
+        "examples": [
+          {
+            "original": "how. to show design impact without meytrics\n\n",
+            "selected": "측정 지표 없이 디자인 영향력을 보여주는 방법"
+          }
+        ]
+      }
+    },
+    "normal_informative": {
+      "Paraphrase": {
+        "rule_id": "R007",
+        "feature": "Paraphrase",
+        "selection_count": 9,
+        "selection_rate": 0.6,
+        "user_preference": "강력 선호 (사용자들이 자주 선택)",
+        "total_samples": 15,
+        "confidence": 0.6,
+        "source": "inferred_from_selection_data",
+        "base_constraints": [
+          "원문보다 30% 이상 짧게",
+          "핵심 정보 누락 금지",
+          "문법 오류 없이",
+          "자연스러운 흐름 유지"
+        ],
+        "examples": [
+          {
+            "original": "일반적인 시나리오에는 웹앱, API 또는 서비스 수준 클라이언트 빌드가 포함됩니다.",
+            "selected": "일반적인 사용 사례로는 웹앱, API, 서비스 수준 클라이언트 구축 등이 있습니다."
+          },
+          {
+            "original": "On the one hand, people who are important to you in the project. These are peopl...",
+            "selected": "한편으로는 프로젝트에서 중요한 사람들, 즉 함께 일하는 사람들, 보고 대상, 프로젝트 성공에 대한 관심과 가치를 가진 사람들이 있습니다. 이들은..."
+          },
+          {
+            "original": "기본적으로 블록체인 결제는 24시간 열려있고 국경을 자유자재로 넘나드는 것 자체가 장점이다",
+            "selected": "블록체인 결제는 24시간 언제든 이용할 수 있고, 국경을 초월한 거래를 지원한다는 점에서 큰 이점을 가진다."
+          }
+        ]
+      },
+      "Tone Adjust": {
+        "rule_id": "R008",
+        "feature": "Tone Adjust",
+        "selection_count": 6,
+        "selection_rate": 0.4,
+        "user_preference": "선호 (꽤 자주 선택)",
+        "total_samples": 15,
+        "confidence": 0.6,
+        "source": "inferred_from_selection_data",
+        "base_constraints": [
+          "목표 톤 100% 적용",
+          "의미 왜곡 금지",
+          "자연스러운 전환",
+          "장르 특성 유지"
+        ],
+        "examples": [
+          {
+            "original": "충남의 인구 감소는 지역 경제 침체는 물론 생활 여건 악화, 돌봄 서비스 부족 등 여러 문제를 일으킬 수 있다. 농업과 제조업 중심의 충남은 청...",
+            "selected": "충청남도의 인구 감소는 지역 경제 침체뿐만 아니라 생활 여건 악화, 돌봄 서비스 부족 등 다양한 문제를 초래할 수 있습니다. 농업과 제조업이 주..."
+          },
+          {
+            "original": "This week, I seem to have landed in an Amazon experiment.\n\n\n\nMy familiar, comfor...",
+            "selected": "이번 주, 저는 아마존의 실험 대상이 된 것 같습니다. 익숙하고 편안했던 노란색 버튼이 갑자기 눈에 띄는 빨간색과 파란색으로 바뀌었습니다. 변화..."
+          },
+          {
+            "original": "두 번째로 측정을 시도해 보세요.",
+            "selected": "두 번째 측정을 시도해 보십시오."
+          }
+        ]
+      }
+    }
+  },
+  "metadata": {
+    "total_samples": 200,
+    "total_rules": 8,
+    "contexts_analyzed": 3,
+    "data_source": "1,054개 데이터 중 200개 샘플링",
+    "note": "역추론 규칙이므로 confidence=0.6. 실제 피드백 규칙은 confidence=1.0"
+  }
+}

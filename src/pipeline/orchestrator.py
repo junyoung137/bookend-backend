@@ -361,7 +361,13 @@ if __name__ == "__main__":
     
     setup_logging()
     
-    BASE_DIR = Path("/home/kj1004mj/bookend-recommendation/data/raw")
+    # BASE_DIR = Path("/home/kj1004mj/bookend-recommendation/data/raw")
+    # 프로젝트 루트 자동 탐지 (src/pipeline/orchestrator.py → pipeline → src → root)
+    PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+    # raw 데이터 폴더 위치
+    BASE_DIR = PROJECT_ROOT / "data" / "raw"
+
     CLIENT_DATA = BASE_DIR / "client_data.json"
     EVENT_DATA  = BASE_DIR / "event_data.json"
     USAGE_DATA  = BASE_DIR / "usage_data.json"

@@ -31,6 +31,8 @@ from src.api.schemas import (
     ComponentHealth,
     ModelInfoResponse,
 )
+from src.api.routers import feedback
+from src.ace.db.handler import init_db
 
 # Logging
 logging.basicConfig(
@@ -85,6 +87,14 @@ async def startup_event():
         rec_generator = get_recommendation_generator()
         logger.info("✅ Recommendation generator loaded")
         
+        # ACE DB 초기화
+        try:
+            init_db()
+            logger.info("✅ ACE system initialized")
+        except Exception as e:
+            # ACE 실패해도 추천 시스템은 계속 작동
+            logger.error(f"⚠️ ACE initialization failed: {e}")
+
         logger.info("✅ API ready to serve requests")
         
     except Exception as e:
@@ -691,6 +701,11 @@ async def reload_model():
             detail=f"Failed to reload model: {str(e)}"
         )
 
+# =========================================================
+# ✅ ACE Router Registration
+# =========================================================
+
+app.include_router(feedback.router)
 
 # =========================================================
 # Run Server
